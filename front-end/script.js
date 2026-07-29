@@ -1,7 +1,12 @@
-
-const botaoEmprestar = document.getElementById('emprestar');
+const botaoEmprestar = document.getElementById('botaoEmprestar');
 const livrosDisponiveis = document.getElementById('livrosDisponiveis');
 const livrosEmprestados = document.getElementById('livrosEmprestados');
+const botaoconfig = document.getElementById('config');
+const areaconfig = document.querySelector('.container-aba-configurações');
+
+botaoconfig.addEventListener('click', (event) => {
+    areaconfig.style.display = 'flex';
+});
 
 livrosEmprestados.addEventListener('click', (event) =>{
     const conteudo= document.getElementById('conteudo');;
@@ -29,7 +34,7 @@ botaoEmprestar.addEventListener('click', (event) => {
     const formulario = document.createElement('div');
     formulario.innerHTML = `
         <form id="formularioEmprestimo" action="">
-            <label for="nomeAluno">Nome do Aluno</label>
+            <label for="nomeAluno" style="color: var(--vermelho-primario);">Nome do Aluno</label>
             <input type="text" name="nomeAluno" id="nomeAluno">
         </form> `;
     conteudo.appendChild(formulario);
