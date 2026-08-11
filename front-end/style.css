@@ -1,0 +1,221 @@
+:root {
+    --vermelho-primario: #86141C;
+    --vermelho-secundario: #86141C;
+    --vermelho-terciario: #2E110D;
+    --branco-creme: #ddcec4;
+    --branco-creme-font: #ddcec4;
+    --cinza: #7B8892;
+    --preto: #000000;
+    --fonte-primaria: 'Germania One', cursive, serif;
+    --fonte-secundaria: 'Atkinson Hyperlegible', sans-serif;
+}
+
+[data-tema="escuro"] {
+    --vermelho-primario: #811e1e;
+    --vermelho-secundario: #ddcec4;
+    --vermelho-terciario: #5e160c;
+    --branco-creme: #290303;
+    --branco-creme-font: #ddcec4;
+    --cinza: #7B8892;
+    --preto: #000000;
+}
+
+body{
+    background-color: var(--branco-creme);
+}
+
+header{
+    background-color: var(--vermelho-terciario);
+    font-family: var(--fonte-primaria);
+    padding-top: 30px;
+    padding-bottom: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 5px solid var(--vermelho-secundario);
+}
+
+.container-logo {
+    display: flex;
+    align-items: center;
+    align-items: center;
+    margin-left: 10rem;
+}
+
+#logo{
+    width: 130px;
+    border-radius: 5.5px;
+    border: 5px solid var(--vermelho-secundario);
+}
+
+.configuracoes {
+    display: flex;
+    flex-direction: row;
+    gap: 4rem;
+    padding-right: 8rem;
+}
+
+#login, #botao-tema {
+    transition: width 0.6s ease, height 0.6s ease;
+    font-family: var(--fonte-primaria);
+}
+
+#login:hover, #botao-tema:hover, #botao-ajuda:hover{
+    cursor: pointer;
+    transform: scale(1.17);
+}
+
+.modal-login {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-conteudo {
+    background-color: var(--vermelho-terciario);
+    border: 4px solid var(--vermelho-primario);
+    border-radius: 16px;
+    padding: 30px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    position: relative;
+    text-align: center;
+    font-family: var(--fonte-secundaria);
+    color: var(--branco-creme-font);
+}
+
+.modal-conteudo h2 {
+    font-family: var(--fonte-primaria);
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+.fechar-modal {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 30px;
+    font-weight: bold;
+    color: var(--branco-creme-font);
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.fechar-modal:hover {
+    color: var(--vermelho-primario);
+}
+
+.campo-login {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+    text-align: left;
+    color: var(--branco-creme-font);
+}
+
+.campo-login label {
+    font-size: 18px;
+}
+
+.campo-login input {
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid var(--vermelho-primario);
+    background-color: var(--branco-creme-font);
+    color: var(--preto);
+    font-size: 18px;
+    outline: none;
+}
+
+#botao-confirmar-login {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--vermelho-primario);
+    color: var(--branco-creme-font);
+    border: none;
+    border-radius: 8px;
+    font-size: 20px;
+    font-family: var(--fonte-secundaria);
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+#botao-confirmar-login:hover {
+    transform: scale(1.03);
+    background-color: #a31923;
+}
+
+#botao-tema {
+    background-color: transparent;
+    color: var(--branco-creme-font);
+    border: none;
+}
+
+#id-sol-tema {
+    display: none;
+}
+
+#id-lua-tema {
+    display: block;
+}
+
+#botao-ajuda {
+    background-color: transparent;
+    color: var(--branco-creme-font);
+    border: none;
+}
+
+#login{
+    background-color: transparent;
+    color: var(--branco-creme-font);
+    font-size: 50px;
+    border: 0px;
+    display: block;
+}
+
+.container-botoes{
+    display: flex;
+    justify-content: space-around;
+    padding-top: 1%;
+    font-family: var(--fonte-secundaria);
+}
+
+.botoes-itens{
+    background-color: var(--vermelho-terciario);
+    color: var(--branco-creme-font);
+    border-radius: 12px;
+    border: 4.5px solid var(--vermelho-primario);
+    font-size: 30px;
+    font-family: var(--fonte-secundaria);
+    transition: width 0.6s ease, height 0.6s ease;
+    padding-left: 1%;
+    padding-right: 1%;
+}
+.botoes-itens:hover{
+    cursor: pointer;
+    transform: scale(1.1);
+}
+
+#botaoEmprestar {
+    transform: scale(1.1);
+    background-color: var(--vermelho-primario);
+    border-color: var(--vermelho-terciario);
+}
+
+#botaoEmprestar:hover {
+    transform: scale(1.2);
+}
+
+#formularioEmprestimo {
+    color: var(--branco-creme-font);
+    font-size: 30px;
+}

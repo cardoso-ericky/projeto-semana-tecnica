@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Literaturespace</title>
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Germania+One&display=swap"
+        rel="stylesheet">
+</head>
+
+<body id="body">
+    <header>
+        <div class="container-logo">
+            <img id="logo" src="imagemlogo.webp" alt="Logo">
+        </div>
+        <div class="configuracoes">
+            <button id="login">Login</button>
+            <div id="modal-login" class="modal-login">
+                <div class="modal-conteudo">
+                    <span id="fechar-modal" class="fechar-modal">&times;</span>
+                    <h2>Acesso do Usuário</h2>
+                    <form id="form-login">
+                        <div class="campo-login">
+                            <label for="senha">Digite sua senha:</label>
+                            <input type="password" id="senha" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" id="botao-confirmar-login">Entrar</button>
+                    </form>
+                </div>
+            </div>
+            <button id="botao-tema">
+                <svg xmlns="http://www.w3.org/2000/svg" id="id-lua-tema" width="47" height="47" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" id="id-sol-tema" width="47" height="47" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2" />
+                    <path d="M12 20v2" />
+                    <path d="m4.93 4.93 1.41 1.41" />
+                    <path d="m17.66 17.66 1.41 1.41" />
+                    <path d="M2 12h2" />
+                    <path d="M20 12h2" />
+                    <path d="m6.34 17.66-1.41 1.41" />
+                    <path d="m19.07 4.93-1.41 1.41" />
+                </svg>
+            </button>
+            <button id="botao-ajuda" data-tooltip="Ajuda">
+                <svg xmlns="http://www.w3.org/2000/svg" width="47" height="47" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-info-icon lucide-info">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 16v-4" />
+                    <path d="M12 8h.01" />
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="container-botoes">
+        <button class="botoes-itens" id="botaoEmprestar">Emprestar</button>
+        <button class="botoes-itens" id="livrosDisponiveis">Livros Disponíveis</button>
+        <button class="botoes-itens" id="livrosEmprestados">Livros Emprestados</button>
+        <button class="botoes-itens" id="botaoDevedores">Devedores</button>
+        <button class="botoes-itens" id="botaoAdicionarLivros">Adicionar Livros</button>
+    </div>
+    <div class="conteudo" id="conteudo">
+        <div>
+            <form id="formularioEmprestimo" action="">
+            <label for="nomeAluno" style="color: var(--vermelho-primario);">Nome do Aluno</label>
+            <input type="text" name="nomeAluno" id="nomeAluno">
+        </form>
+        </div>
+    </div>
+    <script src="./script.js"></script>
+</body>
+
+</html>
