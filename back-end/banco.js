@@ -1,161 +1,164 @@
-const express = require('express');
-const mysql = require('mysql2/promise');
-const cors = require('cors');
+const { mkdirSync } = require('node:fs');
+const path = require('node:path');
+const { DatabaseSync } = require('node:sqlite');
+const { criarSenhaProtegida } = require('./senhas');
 
-const app = express();
-app.use(express.json()); 
-app.use(cors());         
+function agora() {
+  return new Date().toISOString();
+}
 
-const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'biblioteca'
-});
+function abrirBanco({ diretorioDados, senhaInicialAdmin, senhaInicialProtegida }) {
+  mkdirSync(diretorioDados, { recursive: true });
+  const caminho = path.join(diretorioDados, 'assis.sqlite');
+  const banco = new DatabaseSync(caminho);
+  banco.caminhoAssis = caminho;
 
-app.post('/leitores', async (req, res) => {
-  const { idLeitor, nome, telefone } = req.body;
-  try {
-    await pool.query('INSERT INTO Leitor (idLeitor, nome, telefone) VALUES (?, ?, ?)', 
-    [idLeitor, nome, telefone]);
-    res.status(201).json({ mensagem: 'Leitor cadastrado com sucesso!' });
-  } catch (err) {
-    res.status(500).json({ erro: 'Erro ao cadastrar leitor', detalhe: err.message });
+  // Essas configurações protegem as relações entre tabelas e permitem que uma
+  // leitura aconteça enquanto outra ação está sendo gravada.
+  banco.exec('PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;');
+  const integridade = banco.prepare('PRAGMA quick_check').get();
+  if (integridade.quick_check !== 'ok') {
+    banco.close();
+    throw new Error('O banco do Assis não passou na verificação de integridade. Restaure um backup.');
   }
-});
-
-app.get('/leitores', async (req, res) => {
   try {
-    const [leitores] = await pool.query('SELECT * FROM Leitor');
-    res.status(200).json(leitores);
-  } catch (err) {
-    res.status(500).json({ erro: 'Erro ao buscar leitores' });
+    banco.exec(`BEGIN IMMEDIATE;
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      versao INTEGER PRIMARY KEY,
+      aplicada_em TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS usuarios (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nome TEXT NOT NULL,
+      usuario TEXT NOT NULL COLLATE NOCASE UNIQUE,
+      senha_hash TEXT NOT NULL,
+      senha_salt TEXT NOT NULL,
+      perfil TEXT NOT NULL CHECK (perfil IN ('administrador', 'auxiliar')),
+      ativo INTEGER NOT NULL DEFAULT 1 CHECK (ativo IN (0, 1)),
+      criado_em TEXT NOT NULL,
+      atualizado_em TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS turmas (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nome TEXT NOT NULL COLLATE NOCASE,
+      turno TEXT NOT NULL CHECK (turno IN ('Manhã', 'Tarde', 'Noite', 'Integral')),
+      ano_letivo INTEGER NOT NULL CHECK (ano_letivo BETWEEN 2000 AND 2200),
+      ativo INTEGER NOT NULL DEFAULT 1 CHECK (ativo IN (0, 1)),
+      criado_em TEXT NOT NULL,
+      atualizado_em TEXT NOT NULL,
+      UNIQUE (nome, turno, ano_letivo)
+    );
+
+    CREATE TABLE IF NOT EXISTS leitores (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tipo TEXT NOT NULL CHECK (tipo IN ('aluno', 'professor', 'funcionario')),
+      nome TEXT NOT NULL COLLATE NOCASE,
+      identificador TEXT,
+      telefone TEXT,
+      turma_id INTEGER REFERENCES turmas(id),
+      ativo INTEGER NOT NULL DEFAULT 1 CHECK (ativo IN (0, 1)),
+      criado_em TEXT NOT NULL,
+      atualizado_em TEXT NOT NULL,
+      CHECK ((tipo = 'aluno' AND turma_id IS NOT NULL) OR (tipo <> 'aluno' AND turma_id IS NULL))
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS leitores_identificador_unico
+      ON leitores(tipo, identificador) WHERE identificador IS NOT NULL;
+
+    CREATE TABLE IF NOT EXISTS livros (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      titulo TEXT NOT NULL COLLATE NOCASE,
+      autor TEXT NOT NULL COLLATE NOCASE,
+      editora TEXT,
+      edicao TEXT,
+      ano_publicacao INTEGER,
+      genero TEXT,
+      ativo INTEGER NOT NULL DEFAULT 1 CHECK (ativo IN (0, 1)),
+      criado_em TEXT NOT NULL,
+      atualizado_em TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS exemplares (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      livro_id INTEGER NOT NULL REFERENCES livros(id),
+      codigo TEXT COLLATE NOCASE,
+      estado TEXT NOT NULL DEFAULT 'normal'
+        CHECK (estado IN ('normal', 'perdido', 'danificado', 'manutencao', 'arquivado')),
+      criado_em TEXT NOT NULL,
+      atualizado_em TEXT NOT NULL
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS exemplares_codigo_unico
+      ON exemplares(codigo) WHERE codigo IS NOT NULL;
+
+    CREATE TABLE IF NOT EXISTS emprestimos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      leitor_id INTEGER NOT NULL REFERENCES leitores(id),
+      exemplar_id INTEGER NOT NULL REFERENCES exemplares(id),
+      emprestado_por INTEGER NOT NULL REFERENCES usuarios(id),
+      devolvido_por INTEGER REFERENCES usuarios(id),
+      data_saida TEXT NOT NULL,
+      data_prevista TEXT NOT NULL,
+      devolvido_em TEXT,
+      status TEXT NOT NULL CHECK (status IN ('ativo', 'devolvido', 'cancelado', 'encerrado_sem_devolucao')),
+      criado_em TEXT NOT NULL,
+      atualizado_em TEXT NOT NULL
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS emprestimo_ativo_por_exemplar
+      ON emprestimos(exemplar_id) WHERE status = 'ativo';
+
+    CREATE TABLE IF NOT EXISTS eventos_exemplar (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      exemplar_id INTEGER NOT NULL REFERENCES exemplares(id),
+      estado_anterior TEXT NOT NULL,
+      estado_novo TEXT NOT NULL,
+      usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+      criado_em TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS eventos_emprestimo (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      emprestimo_id INTEGER NOT NULL REFERENCES emprestimos(id),
+      tipo TEXT NOT NULL,
+      usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+      detalhes TEXT,
+      criado_em TEXT NOT NULL
+    );
+
+    INSERT OR IGNORE INTO schema_migrations (versao, aplicada_em)
+      VALUES (1, datetime('now'));
+    COMMIT;`);
+  } catch (erro) {
+    // Se uma tabela falhar no meio da criação, nenhuma parte incompleta fica valendo.
+    try { banco.exec('ROLLBACK'); } catch { /* A falha pode ter acontecido antes da transação abrir. */ }
+    banco.close();
+    throw erro;
   }
-});
 
-app.post('/alunos', async (req, res) => {
-  const { idAluno, nome, turma, turno, fk_Leitor_idLeitor } = req.body;
-  try {
-    await pool.query('INSERT INTO aluno (idAluno, nome, turma, turno, fk_Leitor_idLeitor) VALUES (?, ?, ?, ?, ?)', 
-    [idAluno, nome, turma, turno, fk_Leitor_idLeitor]);
-    res.status(201).json({ mensagem: 'Aluno cadastrado com sucesso!' });
-  } catch (err) {
-    res.status(500).json({ erro: 'Erro ao cadastrar aluno', detalhe: err.message });
+  const existeAdmin = banco
+    .prepare("SELECT id FROM usuarios WHERE perfil = 'administrador' LIMIT 1")
+    .get();
+
+  if (!existeAdmin) {
+    const protegida = senhaInicialProtegida || criarSenhaProtegida(senhaInicialAdmin);
+    const data = agora();
+    banco.exec('BEGIN IMMEDIATE');
+    try {
+      banco.prepare(`
+        INSERT INTO usuarios
+          (nome, usuario, senha_hash, senha_salt, perfil, ativo, criado_em, atualizado_em)
+        VALUES (?, ?, ?, ?, 'administrador', 1, ?, ?)
+      `).run('Biblioteca Regente', 'biblioteca-regente', protegida.hash, protegida.salt, data, data);
+      banco.exec('COMMIT');
+    } catch (erro) {
+      banco.exec('ROLLBACK'); banco.close(); throw erro;
+    }
   }
-});
 
-app.get('/alunos', async (req, res) => {
-  try {
-    const [alunos] = await pool.query('SELECT * FROM aluno');
-    res.status(200).json(alunos);
-  } catch (err) {
-    res.status(500).json({ erro: 'Erro ao buscar alunos' });
-  }
-});
+  return banco;
+}
 
-app.post('/professores', async (req, res) => {
-  const { idProfessor, nome, fk_Leitor_idLeitor } = req.body;
-  try {
-    await pool.query('INSERT INTO professor (idProfessor, nome, fk_Leitor_idLeitor) VALUES (?, ?, ?)', 
-    [idProfessor, nome, fk_Leitor_idLeitor]);
-    res.status(201).json({ mensagem: 'Professor cadastrado com sucesso!' });
-  } catch (err) {
-    res.status(500).json({ erro: 'Erro ao cadastrar professor', detalhe: err.message });
-  }
-});
-
-app.get('/professores', async (req, res) => {
-  try {
-    const [professores] = await pool.query('SELECT * FROM professor');
-    res.status(200).json(professores);
-  } catch (err) {
-    res.status(500).json({ erro: 'Erro ao buscar professores' });
-  }
-});
-
-app.post('/funcionarios', async (req, res) => {
-  const { nome, idfuncionario, fk_Leitor_idLeitor } = req.body;
-  try {
-    await pool.query('INSERT INTO funcionario (nome, idfuncionario, fk_Leitor_idLeitor) VALUES (?, ?, ?)', 
-    [nome, idfuncionario, fk_Leitor_idLeitor]);
-    res.status(201).json({ mensagem: 'Funcionário cadastrado com sucesso!' });
-  } catch (err) {
-    res.status(500).json({ erro: 'Erro ao cadastrar funcionário', detalhe: err.message });
-  }
-});
-
-app.get('/funcionarios', async (req, res) => {
-  try {
-    const [funcionarios] = await pool.query('SELECT * FROM funcionario');
-    res.status(200).json(funcionarios);
-  } catch (err) {
-    res.status(500).json({ erro: 'Erro ao buscar funcionários' });
-  }
-});
-
-
-app.post('/livros', async (req, res) => {
-  const { idLivro, titulo, edicao, editora, unidades, genero, ano } = req.body;
-  try {
-    await pool.query('INSERT INTO livro (idLivro, titulo, edicao, editora, unidades, genero, ano) VALUES (?, ?, ?, ?, ?, ?, ?)', 
-    [idLivro, titulo, edicao, editora, unidades, genero, ano]);
-    res.status(201).json({ mensagem: 'Livro cadastrado com sucesso!' });
-  } catch (err) {
-    res.status(500).json({ erro: 'Erro ao cadastrar livro', detalhe: err.message });
-  }
-});
-
-app.get('/livros', async (req, res) => {
-  try {
-    const [livros] = await pool.query('SELECT * FROM livro');
-    res.status(200).json(livros);
-  } catch (err) {
-    res.status(500).json({ erro: 'Erro ao buscar livros' });
-  }
-});
-
-app.post('/exemplares', async (req, res) => {
-  const { estado, fk_livro_idLivro } = req.body;
-  try {
-    await pool.query('INSERT INTO Exemplar (estado, fk_livro_idLivro) VALUES (?, ?)', 
-    [estado, fk_livro_idLivro]);
-    res.status(201).json({ mensagem: 'Exemplar registrado com sucesso!' });
-  } catch (err) {
-    res.status(500).json({ erro: 'Erro ao registrar exemplar', detalhe: err.message });
-  }
-});
-
-app.get('/exemplares', async (req, res) => {
-  try {
-    const [exemplares] = await pool.query('SELECT * FROM Exemplar');
-    res.status(200).json(exemplares);
-  } catch (err) {
-    res.status(500).json({ erro: 'Erro ao buscar exemplares' });
-  }
-});
-
-
-app.post('/emprestimos', async (req, res) => {
-  const { datainicial, datadevolucao, fk_Leitor_idLeitor } = req.body;
-  try {
-    await pool.query('INSERT INTO Empréstimo (datainicial, datadevolucao, fk_Leitor_idLeitor) VALUES (?, ?, ?)', 
-    [datainicial, datadevolucao, fk_Leitor_idLeitor]);
-    res.status(201).json({ mensagem: 'Empréstimo registrado com sucesso!' });
-  } catch (err) {
-    res.status(500).json({ erro: 'Erro ao registrar empréstimo', detalhe: err.message });
-  }
-});
-
-app.get('/emprestimos', async (req, res) => {
-  try {
-    const [emprestimos] = await pool.query('SELECT * FROM Empréstimo');
-    res.status(200).json(emprestimos);
-  } catch (err) {
-    res.status(500).json({ erro: 'Erro ao buscar empréstimos' });
-  }
-});
-
-
-app.listen(3000, () => {
-  console.log('Servidor da Biblioteca rodando em http://localhost:3000');
-});
+module.exports = { abrirBanco, agora };
