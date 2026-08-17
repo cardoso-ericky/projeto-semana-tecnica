@@ -1,16 +1,26 @@
 {
   "name": "projeto-semana-tecnica",
   "version": "1.0.0",
-  "main": "index.js",
+  "private": true,
+  "main": "back-end/iniciar.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node back-end/iniciar.js",
+    "test": "node --test --test-concurrency=1 tests/*.test.js",
+    "qa:browser": "node scripts/qa-browser.js",
+    "build:exe": "npm test && node scripts/build-windows.js",
+    "build:installer": "npm run build:exe && node scripts/build-installer.js"
   },
+  "engines": {
+    "node": "24.19.0",
+    "npm": "11.17.0"
+  },
+  "packageManager": "npm@11.17.0",
   "keywords": [],
   "author": "Samarone, Ericky, Gabriel, Thomas, Alisson",
   "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "express": "^5.2.1",
-    "mysql2": "^3.22.5"
+  "description": "Sistema local e offline para a biblioteca escolar Assis.",
+  "dependencies": {},
+  "devDependencies": {
+    "postject": "1.0.0-alpha.6"
   }
 }
