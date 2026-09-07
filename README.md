@@ -4,8 +4,6 @@ O **Assis** é um sistema pequeno para registrar o acervo e a circulação de li
 
 A interface é feita com HTML, CSS e JavaScript puro. O mesmo aplicativo inicia um servidor HTTP apenas no próprio computador, grava os dados em SQLite e abre a interface no navegador padrão.
 
-> Este documento é também o manual técnico do projeto. Comece pela execução rápida e depois use o sumário para entender ou alterar cada parte.
-
 ## Sumário
 
 - [O que o sistema faz](#o-que-o-sistema-faz)
@@ -29,7 +27,6 @@ A interface é feita com HTML, CSS e JavaScript puro. O mesmo aplicativo inicia 
 - [O que deve e não deve entrar no Git](#o-que-deve-e-não-deve-entrar-no-git)
 - [Solução de problemas](#solução-de-problemas)
 - [Checklist antes de entregar uma mudança](#checklist-antes-de-entregar-uma-mudança)
-- [Glossário](#glossário)
 
 ## O que o sistema faz
 
@@ -1179,25 +1176,3 @@ Primeiro faça backup. Encerre o servidor e mova a pasta de dados para outro nom
 - [ ] `git status --short --ignored` não revela banco, segredo ou anotação local prestes a entrar.
 - [ ] Se houve mudança de build, o instalador foi testado em Windows sem Node.
 - [ ] Se houve mudança de banco, backup e restauração foram testados.
-
-## Glossário
-
-| Termo | Significado neste projeto |
-|---|---|
-| CRUD | criar, consultar, atualizar e excluir/arquivar cadastros |
-| Leitor | aluno, professor ou funcionário que pode pegar livro |
-| Livro | a obra, como título e autor |
-| Exemplar | uma cópia física específica do livro |
-| Empréstimo | registro da saída temporária de um exemplar |
-| Baixa/devolução | confirmação de que o exemplar voltou |
-| Pendência | empréstimo atrasado, perda, dano ou situação ainda não resolvida |
-| Arquivamento lógico | manter o registro e marcar `ativo = 0` para preservar histórico |
-| Migração | alteração versionada no formato do banco existente |
-| API | caminhos HTTP locais usados pela tela para falar com o servidor |
-| SQLite | banco inteiro armazenado em arquivos locais |
-| WAL | modo do SQLite que melhora segurança e concorrência das gravações |
-| Hash | representação irreversível usada para verificar senha sem guardá-la aberta |
-| SHA-256 | resumo usado para conferir se um arquivo de entrega é exatamente o esperado |
-| SEA | mecanismo do Node.js para formar um executável único |
-
-O Assis é deliberadamente simples: um computador, uma biblioteca, um banco local e um conjunto pequeno de regras que pode ser entendido e mantido por estudantes.
