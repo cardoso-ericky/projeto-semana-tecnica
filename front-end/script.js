@@ -98,7 +98,6 @@ async function navegar(pagina) {
   const [titulo, contexto] = paginas[pagina];
   document.querySelector('#titulo-pagina').textContent = titulo;
   document.querySelector('#contexto-pagina').textContent = contexto;
-  // A ação global não precisa aparecer quando o formulário já está aberto.
   document.querySelector('#novo-emprestimo-global').hidden = pagina === 'emprestar';
   document.querySelectorAll('[data-pagina]').forEach((botao) => botao.classList.toggle('ativo', botao.dataset.pagina === pagina));
   document.querySelector('#barra-lateral').classList.remove('aberta');
@@ -239,7 +238,6 @@ async function renderInicio() {
     encerramento_ocorrencia: 'encerrou uma ocorrência',
   };
   conteudo.innerHTML = `
-    ${cabecalho('Bom trabalho, ' + estado.usuario.nome.split(' ')[0], 'Aqui está o que merece atenção hoje.')}
     <section class="indicadores" aria-label="Resumo da biblioteca">
       <button class="indicador" data-ir="emprestimos"><span>Empréstimos ativos</span><strong>${totais.ativos}</strong><small>Acompanhar circulação →</small></button>
       <button class="indicador indicador--alerta" data-ir="pendencias"><span>Em atraso</span><strong>${totais.atrasados}</strong><small>Ver devedores →</small></button>
@@ -252,7 +250,7 @@ async function renderInicio() {
       </section>
       <aside class="painel"><header class="painel__titulo"><h2>Ações rápidas</h2></header><div class="atalhos">
         <button class="atalho" data-ir="emprestar">Emprestar um livro <span>→</span></button>
-        <button class="atalho" data-ir="emprestimos">Dar baixa em devolução <span>→</span></button>
+        <button class="atalho" data-ir="emprestimos">Devolver um livro <span>→</span></button>
         <button class="atalho" data-ir="leitores">Cadastrar leitor <span>→</span></button>
         <button class="atalho" data-ir="livros">Adicionar livro <span>→</span></button>
       </div></aside>
