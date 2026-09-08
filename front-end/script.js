@@ -362,7 +362,7 @@ async function acaoEmprestimo(acao, id) {
 
 async function renderPendencias() {
   const { leitores } = await api('/api/pendencias');
-  conteudo.innerHTML = `${cabecalho('Atrasos e pendências', '<button class="botao botao--secundario" data-imprimir>Imprimir lista</button>')}
+  conteudo.innerHTML = `${cabecalho('Atrasos e pendências')}<button class="botao botao--secundario" data-imprimir>Imprimir lista</button>
     ${leitores.length ? leitores.map((grupo) => `<section class="cartao-pendencia"><header><div><h3>${h(grupo.leitor.nome)}</h3><p class="texto-suave">${h(grupo.leitor.telefone || grupo.leitor.identificador || grupo.leitor.tipo)}</p></div><button class="botao-link" data-historico="${grupo.leitor.id}">Ver histórico</button></header><div class="tabela-caixa tabela-caixa--plana"><table><thead><tr><th>Livro</th><th>Exemplar</th><th>Vencimento</th><th>Pendência</th><th>Ação</th></tr></thead><tbody>${grupo.emprestimos.map((item) => `<tr><td>${h(item.exemplar.livro.titulo)}</td><td>${h(item.exemplar.codigo || `Exemplar ${item.exemplar.id}`)}</td><td>${dataBr(item.dataPrevista)}<span class="subtexto">${item.diasAtraso ? `${item.diasAtraso} dia(s)` : 'Ainda no prazo'}</span></td><td>${item.ocorrencia ? etiqueta(item.ocorrencia,'erro') : etiqueta('Atrasado','alerta')}</td><td>${item.ocorrencia ? `<button class="botao-link" data-resolver="${item.id}">Resolver ocorrência</button>` : `<button class="botao-link" data-emprestimo="devolver" data-id="${item.id}">Devolver</button>`}</td></tr>`).join('')}</tbody></table></div></section>`).join('') : vazio('Nenhuma pendência', 'Não há atrasos, perdas ou danos ativos.')}`;
 }
 
