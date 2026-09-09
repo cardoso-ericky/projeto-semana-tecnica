@@ -11,7 +11,7 @@ const BUILD = path.join(RAIZ, 'build');
 const DIST = path.join(RAIZ, 'dist', 'windows');
 const VERSAO_NODE = '24.19.0';
 const HASH_NODE_WINDOWS = '3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237';
-const MODULOS = ['senhas', 'banco', 'cadastros', 'circulacao', 'arquivos', 'backups', 'servidor', 'iniciar'];
+const MODULOS = ['senhas', 'banco', 'cadastros', 'circulacao', 'arquivos', 'backups', 'sistema', 'servidor', 'iniciar'];
 const ASSETS = [
   'index.html', 'reset.css', 'style.css', 'script.js', 'imagemlogo.webp',
   'fonts/atkinson-regular.woff2', 'fonts/atkinson-bold.woff2', 'fonts/germania-one.woff2',
