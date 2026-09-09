@@ -67,8 +67,6 @@ function ocultarConsole(executavel) {
   const inicioPe = dados.readUInt32LE(0x3c);
   const opcional = inicioPe + 24;
   if (dados.readUInt16LE(opcional) !== 0x20b) throw new Error('O executável Windows não é PE x64 como esperado.');
-  // O valor 2 seleciona o subsistema gráfico do Windows. Isso evita que uma
-  // janela preta apareça para a bibliotecária, embora o programa continue em JS.
   dados.writeUInt16LE(2, opcional + 68);
   writeFileSync(executavel, dados);
 }
