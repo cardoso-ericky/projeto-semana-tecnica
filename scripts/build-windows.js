@@ -19,7 +19,11 @@ const ASSETS = [
 
 function conferirFerramentas() {
   const node = process.versions.node;
-  const npm = spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['--version'], { encoding: 'utf8' }).stdout.trim();
+  const npm = spawnSync(
+  process.platform === 'win32' ? 'npm.cmd' : 'npm',
+  ['--version'],
+  { encoding: 'utf8', shell: process.platform === 'win32' }
+).stdout.trim();
   if (node !== VERSAO_NODE || npm !== '11.17.0') {
     throw new Error(`Build congelado exige Node ${VERSAO_NODE} e npm 11.17.0. Recebido: Node ${node}, npm ${npm}.`);
   }
